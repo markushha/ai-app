@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Montserrat } from "next/font/google";
 
+import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils";
+
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -66,6 +68,8 @@ const routes = [
 ]
 
 export default function Sidebar() {
+  const pathname = usePathname()
+
   return (
     <div className="space-y-4 py-4 flex flex-col h-full
     bg-[#111827] text-white">
@@ -89,9 +93,10 @@ export default function Sidebar() {
             <Link 
               href={route.href} 
               key={route.href}
-              className="text-sm group flex p-3 w-full
-              justify-start font-medium hover:text-white
-              hover:bg-white/10 rounded-lg transition"  
+              className={cn(
+                "text-sm group flex p-3 w-full justify-start font-medium hover:text-white hover:bg-white/10 rounded-lg transition", 
+                route.href === pathname ? "bg-white/10" : ""
+              )}  
             >
               <div className="flex items-center flex-1">
                 <route.icon className={cn("w-6 h-6 mr-4", route.color)} />
