@@ -86,7 +86,7 @@ export default function ImagePage() {
                           focus-visible:ring-0
                           focus-visible:ring-transparent"
                         disabled={isLoading}
-                        placeholder="Picture of a cat laying on the bottom of the trench"
+                        placeholder="Cat under the water"
                         {...field}
                       />
                     </FormControl>
@@ -149,7 +149,7 @@ export default function ImagePage() {
               />
               <Button
                 disabled={isLoading}
-                className="w-full col-span-12 mt-2 md:mt-0 md:col-span-2"
+                className="w-full col-span-12 mt-2 md:mt-0 lg:col-span-2"
               >
                 Generate
               </Button>
