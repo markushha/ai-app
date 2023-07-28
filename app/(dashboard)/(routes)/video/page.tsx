@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import { MessageSquare } from "lucide-react";
+import { VideoIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -10,21 +10,16 @@ import { formSchema } from "./constants";
 import Heading from "@/components/heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChatCompletionRequestMessage } from 'openai'
 import axios from "axios";
 import Empty from "@/components/empty";
 import Loader from "@/components/loader";
-import { cn } from "@/lib/utils";
-import UserAvatar from "@/components/user-avatar";
-import BotAvatar from "@/components/bot-avatar";
 
-export default function ConverstionPage() {
+export default function VideoPage() {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
+  const [video, setVideo] = useState<string>();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,20 +32,12 @@ export default function ConverstionPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const userMessage: ChatCompletionRequestMessage = {
-        role: 'user',
-        content: values.prompt,
-      };
-      const newMessages = [...messages, userMessage];
+      setVideo(undefined);
+      const response = await axios.post("/api/video", values);
 
-      const response = await axios.post('/api/conversation', {
-        messages: newMessages,
-      })
-
-      setMessages((prev) => [...prev, userMessage, response.data]);
-
+      setVideo(response.data[0]);
       form.reset();
-    } catch(e: any) {
+    } catch (e: any) {
       console.log(e);
     } finally {
       router.refresh();
@@ -60,11 +47,11 @@ export default function ConverstionPage() {
   return (
     <div>
       <Heading
-        title="Conversation"
-        description="Powered by OpenAI"
-        icon={MessageSquare}
-        iconColor="text-violet-500"
-        bgColor="bg-violet-500/10"
+        title="Video Generation"
+        description="Powered by Replicate AI"
+        icon={VideoIcon}
+        iconColor="text-orange-700"
+        bgColor="bg-orange-700/10"
       />
       <div className="px-4 lg:px-8">
         <div>
@@ -83,14 +70,17 @@ export default function ConverstionPage() {
                           focus-visible:ring-0
                           focus-visible:ring-transparent"
                         disabled={isLoading}
-                        placeholder="How many hours does it take to go to the moon?"
+                        placeholder="Create a video of Trump playing piano"
                         {...field}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
-              <Button disabled={isLoading} className="w-full col-span-12 mt-2 md:mt-0 md:col-span-2">
+              <Button
+                disabled={isLoading}
+                className="w-full col-span-12 mt-2 md:mt-0 md:col-span-2"
+              >
                 Generate
               </Button>
             </form>
@@ -106,27 +96,19 @@ export default function ConverstionPage() {
               <Loader />
             </div>
           )}
-          {messages.length === 0 && !isLoading && (
+          {!video && !isLoading && (
             <div className="div">
-              <Empty label="Conversation history is empty" />
+              <Empty label="No video generated" />
             </div>
           )}
-          <div className="flex flex-col gap-y-4 mb-4">
-            {messages?.map((message) => (
-              <div 
-                key={message.content}
-                className={cn(
-                  "p-8 w-full flex items-center gap-x-8 rounded-lg",
-                  message.role === 'user' ? 'bg-white border border-black/10' : 'bg-muted'
-                )}
-              >
-                {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                <p className="text-sm font-medium">
-                  {message.content}
-                </p>
-              </div>
-            ))}
-          </div>
+          {video && (
+            <video
+              className="w-full aspect-video mt-8 rounded-lg border bg-black"
+              controls
+            >
+              <source src={video} />
+            </video>
+          )}
         </div>
       </div>
     </div>
